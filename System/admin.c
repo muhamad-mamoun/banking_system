@@ -49,7 +49,16 @@ TaskStateType CreateNewAccount(CLientAccountDataType* new_client_data)
 	if(new_record != NULL)
 	{
 		new_record->record_data = *new_client_data;
-		new_record->next_record = head_record;
+
+		if(head_record != NULL)
+		{
+			new_record->next_record = head_record;
+		}
+		else
+		{
+			new_record->next_record = NULL;
+		}
+
 		head_record = new_record;
 		task_state = DONE;
 	}
@@ -61,6 +70,13 @@ TaskStateType CreateNewAccount(CLientAccountDataType* new_client_data)
 	return task_state;
 }
 
+/*===========================================================================================================
+ * [Function Name] :
+ * [Description]   :
+ * [Arguments]     : <>      ->
+ *                   <>      ->
+ * [return]        : The function returns void.
+ ==========================================================================================================*/
 TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* account_balance)
 {
 	TaskStateType task_state = FAILED;
@@ -77,6 +93,39 @@ TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* accoun
 				task_state = DONE;
 				break;
 			}
+
+			current_record = current_record->next_record;
+		}
+	}
+
+	return task_state;
+}
+
+/*===========================================================================================================
+ * [Function Name] :
+ * [Description]   :
+ * [Arguments]     : <>      ->
+ *                   <>      ->
+ * [return]        : The function returns void.
+ ==========================================================================================================*/
+TaskStateType RemoveAccount(unsigned long client_id)
+{
+	TaskStateType task_state = FAILED;
+
+	if(head_record != NULL)
+	{
+		ClientRecordType* current_record = head_record;
+		while(current_record->next_record != NULL)
+		{
+			if(current_record->next_record->record_data->user_id == client_id)
+			{
+				ClientRecordType* freed_record = current_record->next_record;
+				current_record->next_record = current_record->next_record->next_record;
+				free(freed_record);
+				task_state = DONE;
+				break;
+			}
+
 			current_record = current_record->next_record;
 		}
 	}
