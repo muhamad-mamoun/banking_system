@@ -64,17 +64,22 @@ TaskStateType CreateNewAccount(CLientAccountDataType* new_client_data)
 TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* account_balance)
 {
 	TaskStateType task_state = FAILED;
-	ClientRecordType* current_record = head_record;
 
-	while(current_record != NULL)
+	if(head_record != NULL)
 	{
-		if(current_record->record_data->user_id == client_id)
+		ClientRecordType* current_record = head_record;
+
+		while(current_record != NULL)
 		{
-			*account_balance = current_record->record_data->account_balance;
-			task_state = DONE;
-			break;
+			if(current_record->record_data->user_id == client_id)
+			{
+				*account_balance = current_record->record_data->account_balance;
+				task_state = DONE;
+				break;
+			}
+			current_record = current_record->next_record;
 		}
-		current_record = current_record->next_record;
 	}
+
 	return task_state;
 }
