@@ -34,7 +34,39 @@ Description  :
                                        < User-defined Data Types >
 ===========================================================================================================*/
 
+typedef enum
+{
+	DONE,FAILED
+}TaskStateType;
 
+typedef struct
+{
+	char first_name[20];
+	char middle_name[20];
+	char last_name[20];
+}ClientNameType;
+
+typedef enum
+{
+	MALE,FEMALE
+}ClientGenderType;
+
+typedef struct
+{
+	unsigned long user_id;
+	ClientNameType full_name;
+	ClientGenderType gender;
+	char mobile_number[15];
+	unsigned long account_balance;
+}CLientAccountDataType;
+
+struct ClientRecord
+{
+	CLientAccountDataType record_data;
+	ClientRecordType* next_record;
+};
+
+typedef struct ClientRecord ClientRecordType;
 
 /*===========================================================================================================
                                          < Function-like Macros >
