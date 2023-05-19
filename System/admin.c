@@ -21,7 +21,7 @@ Description  :
                                            < Global Variables >
 ===========================================================================================================*/
 
-ClientRecordType* head_record = NULL;
+static ClientRecordType* head_record = NULL;
 
 /*===========================================================================================================
                                       < Private Functions Prototypes >
@@ -77,19 +77,20 @@ TaskStateType CreateNewAccount(CLientAccountDataType* new_client_data)
  *                   <>      ->
  * [return]        : The function returns void.
  ==========================================================================================================*/
-TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* account_balance)
+TaskStateType RemoveAccount(unsigned long client_id)
 {
 	TaskStateType task_state = FAILED;
 
 	if(head_record != NULL)
 	{
 		ClientRecordType* current_record = head_record;
-
-		while(current_record != NULL)
+		while(current_record->next_record != NULL)
 		{
-			if(current_record->record_data->user_id == client_id)
+			if(current_record->next_record->record_data->client_id == client_id)
 			{
-				*account_balance = current_record->record_data->account_balance;
+				ClientRecordType* freed_record = current_record->next_record;
+				current_record->next_record = current_record->next_record->next_record;
+				free(freed_record);
 				task_state = DONE;
 				break;
 			}
@@ -101,6 +102,28 @@ TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* accoun
 	return task_state;
 }
 
+ClientRecordType* FindClientAccount(unsigned long target_client_id)
+{
+	ClientRecordType* target_client_record = NULL;
+
+	if(head_record != NULL)
+	{
+		ClientRecordType* current_record = head_record;
+		while(current_record != NULL)
+		{
+			if(current_record->record_data->client_id == target_client_id)
+			{
+				target_client_record = current_record;
+				break;
+			}
+
+			current_record = current_record->next_record;
+		}
+	}
+
+	return target_client_record;
+}
+
 /*===========================================================================================================
  * [Function Name] :
  * [Description]   :
@@ -108,26 +131,66 @@ TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* accoun
  *                   <>      ->
  * [return]        : The function returns void.
  ==========================================================================================================*/
-TaskStateType RemoveAccount(unsigned long client_id)
+TaskStateType CheckAccountBalance(unsigned long client_id, unsigned long* account_balance)
 {
 	TaskStateType task_state = FAILED;
 
 	if(head_record != NULL)
 	{
-		ClientRecordType* current_record = head_record;
-		while(current_record->next_record != NULL)
-		{
-			if(current_record->next_record->record_data->user_id == client_id)
-			{
-				ClientRecordType* freed_record = current_record->next_record;
-				current_record->next_record = current_record->next_record->next_record;
-				free(freed_record);
-				task_state = DONE;
-				break;
-			}
+		ClientRecordType* target_client_record = FindClientAccount(client_id);
 
-			current_record = current_record->next_record;
+		if(target_client_record != NULL)
+		{
+			*account_balance = target_client_record->record_data->account_balance;
+			task_state = DONE;
 		}
+	}
+
+	return task_state;
+}
+
+TaskStateType MakeTransaction(unsigned long sender_id, unsigned long receiver_id, unsigned long transaction_value)
+{
+	TaskStateType task_state = FAILED;
+
+	ClientRecordType* sender_client_record = FindClientAccount(sender_id);
+	ClientRecordType* receiver_client_record = FindClientAccount(receiver_id);
+
+	if((sender_client_record != NULL) && (receiver_client_record != NULL))
+	{
+		receiver_client_record->record_data->account_balance += transaction_value;
+		sender_client_record->record_data->account_balance -= transaction_value;
+		task_state = DONE;
+	}
+
+	return task_state;
+}
+
+TaskStateType DepositMoney(unsigned long client_id, unsigned long deposit_value)
+{
+	TaskStateType task_state = FAILED;
+
+	ClientRecordType* client_record = FindClientAccount(client_id);
+
+	if(client_record != NULL)
+	{
+		client_record->record_data->account_balance += deposit_value;
+		task_state = DONE;
+	}
+
+	return task_state;
+}
+
+TaskStateType WithdrawMoney(unsigned long client_id, unsigned long Withdraw_value)
+{
+	TaskStateType task_state = FAILED;
+
+	ClientRecordType* client_record = FindClientAccount(client_id);
+
+	if(client_record != NULL)
+	{
+		client_record->record_data->account_balance -= Withdraw_value;
+		task_state = DONE;
 	}
 
 	return task_state;

@@ -53,7 +53,7 @@ typedef enum
 
 typedef struct
 {
-	unsigned long user_id;
+	unsigned long client_id;
 	ClientNameType full_name;
 	ClientGenderType gender;
 	char mobile_number[15];
